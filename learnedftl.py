@@ -1926,7 +1926,7 @@ class FrameLogPLR:
 
         
 class PFTL(object):         # [06/24] PFTL saves list of 1 LPN to n PPNs.. why??? for garbage collection? (tracking used page?)
-    def __init__(self):     # [06/24] PFTL later used as metadata, oob. Verification Check
+    def __init__(self):     # [06/24] PFTL later used as metadata, oob. Verification Check (i think)
         # store update history for verification purpose
         self.mapping_table = defaultdict(list)      # [06/24] defaultdict creates default value when key doesn't exist
 
