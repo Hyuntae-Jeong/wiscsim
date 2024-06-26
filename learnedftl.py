@@ -1076,7 +1076,7 @@ class SimpleSegment():
 
     @staticmethod
     def frompoints(p1, p2):
-        k = float(p2[1] - p1[1]) / (p2[0] - p1[0])
+        k = float(p2[1] - p1[1]) / (p2[0] - p1[0])      # [06/26] k is slope between two points
         b = -k * p1[0] + p1[1]
         return SimpleSegment(k, b, p1[0], p2[0])
 
@@ -1365,16 +1365,16 @@ class PLR():
             self.state = PLR.SECOND
 
         elif self.state == PLR.SECOND:
-            if self.should_stop(point):
+            if self.should_stop(point):         # [06/26] Saving previous segment and making new segment. S0 is start point of new segment
                 prev_segment = self.build_segment()
                 self.s0 = point
-                self.state = PLR.SECOND
+                self.state = PLR.SECOND         # [06/26] But why remaining state Second???
                 self.points = []
 
             else:
                 self.s1 = point
                 self.state = PLR.READY
-                self.rho_lower = SimpleSegment.frompoints(SimpleSegment.get_upper_bound(self.s0, self.gamma),
+                self.rho_lower = SimpleSegment.frompoints(SimpleSegment.get_upper_bound(self.s0, self.gamma),       # [06/26] Upper bound and lower bound is for error bound (gamma)
                                                     SimpleSegment.get_lower_bound(self.s1, self.gamma))
                 self.rho_upper = SimpleSegment.frompoints(SimpleSegment.get_lower_bound(self.s0, self.gamma),
                                                     SimpleSegment.get_upper_bound(self.s1, self.gamma))
@@ -1926,7 +1926,7 @@ class FrameLogPLR:
 
         
 class PFTL(object):         # [06/24] PFTL saves list of 1 LPN to n PPNs.. why??? for garbage collection? (tracking used page?)
-    def __init__(self):     # [06/24] PFTL later used as metadata, oob. Verification Check (i think)
+    def __init__(self):     # [06/24] PFTL later used as metadata, oob. Verification Check
         # store update history for verification purpose
         self.mapping_table = defaultdict(list)      # [06/24] defaultdict creates default value when key doesn't exist
 
