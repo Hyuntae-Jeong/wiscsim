@@ -1,4 +1,3 @@
-# testing git -JHT
 from asyncore import write
 import bidict
 import sys
@@ -47,9 +46,7 @@ LOOKUP_LATENCY = 50
 # relearn_counter = 0
 # relearn_ppns = []
 
-
 # FTL components
-
 class Ftl(ftlbuilder.FtlBuilder):
 
     def __init__(self, confobj, recorderobj, flashobj, simpy_env, des_flash, ncq):
@@ -88,8 +85,6 @@ class Ftl(ftlbuilder.FtlBuilder):
         self.waf = {"request" : 0, "actual" : 0}
         self.raf = {"request" : 0, "actual" : 0}
         self.enable_recording = False
-    
-
 
     def recorder_enabled(self, enable=True):
         self.enable_recording = enable
@@ -659,7 +654,6 @@ class PageValidityBitmap(object):
                 valid_pages.append(pg)
         return valid_pages
 
-
     def is_page_valid(self, pagenum):
         return self.bitmap[pagenum] == self.VALID
 
@@ -773,7 +767,6 @@ class OutOfBandAreas(object):
         return None
 
 
-
 class OutOfBandAreasMemOpt(object):
     """
     Memory optimized version
@@ -799,7 +792,6 @@ class OutOfBandAreasMemOpt(object):
         if abs(real_ppn - source_page) <= self.num_p2l_entries:
             return real_ppn
         return None
-
 
 
 class FlashMetadata(object):
@@ -1721,7 +1713,7 @@ class FrameLogPLR:
 
     def update(self, entries, blocknum):
         pages_to_write, pages_to_read = [], []
-        split_entries = FrameLogPLR.split_into_frame(self.frame_length, entries)
+        split_entries = FrameLogPLR.split_into_frame(self.frame_length, entries)  # [06/27] frame length is 256 for LeaFTL
         frame_nos = []
         for frame_no, entries in split_entries.items():
             frame_nos += [frame_no]
@@ -1949,7 +1941,6 @@ class PFTL(object):         # [06/24] PFTL saves list of 1 LPN to n PPNs.. why??
     @property
     def memory(self):
         return len(self.mapping_table) * (PPN_BYTES + LPN_BYTES)
-
 
 
 def split_ext(extent):
