@@ -46,7 +46,7 @@ LOOKUP_LATENCY = 50
 # relearn_counter = 0
 # relearn_ppns = []
 
-# FTL components
+# [06/27] Basic FTL components
 class Ftl(ftlbuilder.FtlBuilder):
 
     def __init__(self, confobj, recorderobj, flashobj, simpy_env, des_flash, ncq):
@@ -609,6 +609,7 @@ class Ftl(ftlbuilder.FtlBuilder):
                  },
                 )
 
+# [06/27] Managing Validity of Page Bitmap and Block Validity Counter(BVC)
 class PageValidityBitmap(object):
     "Using one bit to represent state of a page"
     "Erased state is recorded by BVC"
@@ -626,13 +627,13 @@ class PageValidityBitmap(object):
 
     def validate_page(self, pagenum):
         self.bitmap[pagenum] = self.VALID
-        self.bvc.counter[pagenum // self.conf.n_pages_per_block] += 1
+        self.bvc.counter[pagenum // self.conf.n_pages_per_block] += 1 # [06/27] Block Validity Counter checks valid pages per block
 
     def invalidate_page(self, pagenum):
         self.bitmap[pagenum] = self.INVALID
-        self.bvc.counter[pagenum // self.conf.n_pages_per_block] -= 1
+        self.bvc.counter[pagenum // self.conf.n_pages_per_block] -= 1 # [06/27] If page becomes unvalid, minus 1 to bvc
 
-    def validate_block(self, blocknum):
+    def validate_block(self, blocknum): # [06/27] validate entire block. Block's range is physcial page number..!!
         ppn_start, ppn_end = self.conf.block_to_page_range(blocknum)
         for pg in range(ppn_start, ppn_end):
             self.validate_page(pg)
@@ -644,9 +645,9 @@ class PageValidityBitmap(object):
 
     def get_num_valid_pages(self, blocknum):
         start, end = self.conf.block_to_page_range(blocknum)
-        return sum(self.bitmap[start:end])
+        return sum(self.bitmap[start:end]) # [06/27] Bitmap is for each page number, and BCV is for each block
 
-    def get_valid_pages(self, blocknum):
+    def get_valid_pages(self, blocknum): # [06/27] Get valid pages in the block 
         valid_pages = []
         start, end = self.conf.block_to_page_range(blocknum)
         for pg in range(start, end):
@@ -1026,7 +1027,6 @@ class FlashMetadata(object):
             exit(0)
 
 # Learning-related components
-
 class SimpleSegment():
     def __init__(self, k, b, x1, x2):
         self.b = b
