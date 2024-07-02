@@ -682,13 +682,13 @@ class BlockValidityCounter(object):
     """
 
     def __init__(self, conf):
-        self.conf = conf
-        self.last_inv_time_of_block = {}
-        self.timestamp_table = {}
-        self.cur_timestamp = 0
-        self.counter = defaultdict(lambda:0)
-        self.free_block_list = [self.conf.n_blocks_per_channel * channel + block 
-                                for block in range(self.conf.n_blocks_per_channel)
+        self.conf = conf                    # [07/01] FTL 시뮬레이션의 설정을 포함하는 객체
+        self.last_inv_time_of_block = {}    # [07/01] 각 블록의 마지막 유효성 무효화 시간
+        self.timestamp_table = {}           # [07/01] PPN별 타임스탬프를 저장하는 테이블
+        self.cur_timestamp = 0              # [07/01] 현재 타임스탬프
+        self.counter = defaultdict(lambda:0)# [07/01] 각 블록의 유효 페이지 수를 저장
+        self.free_block_list = [self.conf.n_blocks_per_channel * channel + block        # [07/01] self.conf.n_blocks_per_channel * channel => 채널의 시작 블록 번호 계산
+                                for block in range(self.conf.n_blocks_per_channel)      # [07/01] free_block_list는 초기 상태에서 모든 블록의 번호를 포함 (모두 사용가능한 상태)
                                 for channel in range(self.conf.n_channels_per_dev)]
 
     def _incr_timestamp(self):
@@ -711,7 +711,7 @@ class BlockValidityCounter(object):
     # FIXME improve efficiency; now round-robin
     # bottleneck
     def next_free_block(self, wear_level=False):
-        free_block = self.free_block_list.pop(0)
+        free_block = self.free_block_list.pop(0) # [07/01] free block을 할당하는 방법 => 리스트의 맨 앞에서 pop, 첫 cylce은 순서대로 할당될 것임
         return free_block
         # for block in range(self.conf.n_blocks_per_channel):
         #     for channel in range(self.conf.n_channels_per_dev):
@@ -736,20 +736,20 @@ class OutOfBandAreas(object):
 
     def __init__(self, conf, gamma):
         self.oob_data = defaultdict(None)
-        self.gamma = gamma
-        self.per_page_size = conf['flash_config']["oob_size_per_page"]
+        self.gamma = gamma  # [07/01] 페이지당 저장할 수 있는 매핑 엔트리 수를 결정하는데 사용
+        self.per_page_size = conf['flash_config']["oob_size_per_page"] # [07/01] 페이지당 OOB 영역의 크기
         self.p2l_entry_size = 4
-        self.num_p2l_entries = min(2*self.gamma, self.per_page_size / 4)
+        self.num_p2l_entries = min(2*self.gamma, self.per_page_size / 4) # [07/02] 최대 저장되는 entry, 하지만 코드에서 사용하지 않아 보임. -> OOB 구현이 제대로 되지 않거나 사용되고 있지 않음
 
     # entries: List<Tuple<lpn, ppn>>
-    def set_oob(self, source_page, entries):
-        assert(entries == None or isinstance(entries, list))
+    def set_oob(self, source_page, entries):                    # [07/02] source_page는 원본 페이지 번호(PPN)
+        assert(entries == None or isinstance(entries, list))    # [07/02] entries = LPN<->PPN 쌍의 목록, None이거나 리스트 형태
         if entries == None:
-            self.oob_data[source_page] = entries
+            self.oob_data[source_page] = entries#(None)         # [07/02] entries가 none일 경우 oob_data
         else:
             rev_map = dict() #bidict.bidict()
             for (lpn, ppn) in entries:
-                rev_map[lpn] = ppn
+                rev_map[lpn] = ppn                              # [07/02] rev_map은 source_page에 대해서 lpn에 대한 ppn을 저장, 해당 페이지에 여러개의 lpn이 있다면..?
             self.oob_data[source_page] = rev_map
 
     def ppn_to_lpn(self, ppn, source_page=None):
@@ -760,11 +760,11 @@ class OutOfBandAreas(object):
             source_page in self.oob_data and ppn in self.oob_data[source_page])
         return self.oob_data[source_page][ppn]
 
-    def lpn_to_ppn(self, lpn, source_page):
+    def lpn_to_ppn(self, lpn, source_page):     #[07/02] LPN <-> Source_page(PPN) mapping finder
         if source_page in self.oob_data:
             rev_map = self.oob_data[source_page]
             if rev_map:
-                return rev_map.get(lpn) #.inv.get(lpn)
+                return rev_map.get(lpn) #.inv.get(lpn) 
         return None
 
 
