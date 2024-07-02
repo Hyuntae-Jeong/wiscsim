@@ -779,7 +779,7 @@ class OutOfBandAreasMemOpt(object):
     def __init__(self, conf, gamma, reference_mapping_table):
         self.gamma = gamma
         self.num_p2l_entries = min(2*self.gamma, conf['flash_config']["oob_size_per_page"] / 4)
-        self.reference_mapping_table = reference_mapping_table
+        self.reference_mapping_table = reference_mapping_table  # [07/02] OOB 영역에 저장할 수 있는 최대 매핑 엔트리 수 
 
     # entries: List<Tuple<lpn, ppn>>
     def set_oob(self, source_page, entries):
@@ -790,7 +790,7 @@ class OutOfBandAreasMemOpt(object):
 
     def lpn_to_ppn(self, lpn, source_page):
         real_ppn = self.reference_mapping_table.get(lpn)
-        if abs(real_ppn - source_page) <= self.num_p2l_entries:
+        if abs(real_ppn - source_page) <= self.num_p2l_entries: # [07/02] referencing mapping table로 구한 ppn과 source_page의 거리가 가까운지 확인
             return real_ppn
         return None
 
