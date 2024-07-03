@@ -826,7 +826,6 @@ class FlashMetadata(object):
         # counters
         self.levels = defaultdict(int)
 
-
     ############# Flash read related ############
 
     def ppn_to_lpn(self, ppn, source_page=None):
@@ -916,7 +915,7 @@ class FlashMetadata(object):
         extents = sorted(extents)
 
         # find the next free block
-        next_free_block = self.bvc.next_free_block()
+        next_free_block = self.bvc.next_free_block()        # [07/03] update할 때 매번 free block을 받아서 새로 학습시킴
         next_free_ppn = self.conf.n_pages_per_block * next_free_block
 
         # allocate flash pages
@@ -943,7 +942,7 @@ class FlashMetadata(object):
                 self.pvb.invalidate_page(old_ppn)
 
         ## mapping table gc (replaced with compaction)
-        # self.mapping_table.gc(next_free_block)
+        # self.mapping_table.gc(next_free_block)            # [07/03] GC대신에 compaction으로 문제를 해결하는데 GC 적용해보기
 
         ## update mapping table
         mapping_pages_to_write, mapping_pages_to_read = self.mapping_table.update(entries, next_free_block)
@@ -1488,9 +1487,7 @@ class LogPLR():
                     break
 
         return results
-            
-
-
+    
     # recursively add segments to each level
     # bottleneck
     def add_segments(self, level, segments, recursive=True):
@@ -1547,9 +1544,6 @@ class LogPLR():
             if len(conflicts) > 0:
                 self.runs.insert(level+1, conflicts)
             
-
-    
-
     def __str__(self):
         repr = ""
         for level in range(len(self.runs)):
@@ -1652,7 +1646,6 @@ class LogPLR():
                                 self.runs[lower_layer].remove(old_seg)
                                 results[lower_layer].remove(old_seg)
         # return dict() #relearn
-
 
 # Distribute the mapping entries into LPN ranges
 # Each LogPLR is responsible for one range
@@ -1821,7 +1814,6 @@ class FrameLogPLR:
     def promote(self):
         for frame in self.frames.values():
             frame.promote()
-
 
     def should_flush(self):
         if self.memory > self.max_size:
